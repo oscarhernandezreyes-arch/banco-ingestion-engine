@@ -30,5 +30,6 @@ def run_pipeline():
 
     print("🏁 [ENGINE] Pipeline modular avanzado finalizado con éxito.")
 
-if __name__ == "__main__":
-    run_pipeline
+    #aplicamos un eror intencional para probar las reglas en YAML y el Actions (2)
+if __name__ == "__main__
+    run_pipeline()

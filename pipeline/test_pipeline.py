@@ -1,10 +1,16 @@
 import pytest
+import os  # Manejo del sistema operativo para inyectar variables de entorno
 from pyspark.sql import SparkSession
 # Importamos la clase desde tu archivo transformer
 from pipeline.transformer import DataTransformer 
 
 @pytest.fixture(scope="session")
 def spark():
+    # --- TRUCO PRO PARA GITHUB ACTIONS (MODO COLAB) ---
+    # Si la máquina virtual no tiene mapeado JAVA_HOME, lo buscamos dinámicamente
+    if "JAVA_HOME" not in os.environ:
+        os.environ["JAVA_HOME"] = os.popen("echo $JAVA_HOME").read().strip()
+    
     # Levanta el entorno Spark temporal en la máquina virtual de GitHub
     return SparkSession.builder \
         .master("local[*]") \

@@ -1,6 +1,6 @@
 name: CI Banco Ingestion Engine
 
-# 1. ¿Cuándo se va a activar el robot?
+# 1. ¿Cuándo se va a activar el robot? (Cada que haya un push o un PR a la rama main)
 on:
   push:
     branches: [ "main" ]
@@ -10,44 +10,39 @@ on:
 # 2. ¿Qué va a hacer el robot dentro de su computadora virtual?
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest # Levanta una máquina virtual con Linux Ubuntu gratis
 
     steps:
     # Paso A: Clonar tu repositorio dentro de la máquina de GitHub
     - name: Checkout de codigo
       uses: actions/checkout@v3
 
-    # ======================================================================
-    # ¡NUEVO ORDEN!: Primero aseguramos Java para que PySpark tenga cimientos
-    # ======================================================================
+    # Paso B: Instalar Java primero para tener los cimientos listos
     - name: Instalar Java (Requisito de Apache Spark)
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '11'
+        java-version: '11' # Versión super estable para Spark
 
-    # Paso B: Instalar Python de forma automática
+    # Paso C: Instalar Python de forma automática
     - name: Configurar Python 3.10
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
 
-    # Paso C: Instalar herramientas de revisión (Linter) y frameworks de pruebas
+    # Paso D: Instalar herramientas de revisión (Linter) y frameworks de pruebas
     - name: Instalar Flake8 y Dependencias de Spark
       run: |
         python -m pip install --upgrade pip
         pip install flake8
         pip install pyspark pytest
 
-    # Paso D: El examen de sintaxis
+    # Paso E: El examen de sintaxis (Linter)
     - name: Analizar errores de sintaxis en el Engine
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-    # Paso F: ¡Correr tus pruebas unitarias mapeando las variables de entorno!
+    # Paso F: ¡Correr tus pruebas unitarias!
     - name: Ejecutar Tests Unitarios de Spark
-      env:
-        # Le soplamos a PySpark la ruta exacta de Java en Ubuntu de GitHub Actions
-        JAVA_HOME: /usr/lib/jvm/temurin-11-jdk-amd64
       run: |
         pytest pipeline/

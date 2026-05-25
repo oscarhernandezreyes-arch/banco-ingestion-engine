@@ -1,6 +1,6 @@
 name: CI Banco Ingestion Engine
 
-# 1. ¿Cuándo se va a activar el robot? (Cada que haya un push o un PR a la rama main)
+# 1. ¿Cuándo se va a activar el robot?
 on:
   push:
     branches: [ "main" ]
@@ -10,19 +10,19 @@ on:
 # 2. ¿Qué va a hacer el robot dentro de su computadora virtual?
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest # Levanta una máquina virtual con Linux Ubuntu gratis
+    runs-on: ubuntu-latest 
 
     steps:
     # Paso A: Clonar tu repositorio dentro de la máquina de GitHub
     - name: Checkout de codigo
       uses: actions/checkout@v3
 
-    # Paso B: Instalar Java primero para tener los cimientos listos
+    # Paso B: Instalar Java 17 (¡La versión que pide tu PySpark!)
     - name: Instalar Java (Requisito de Apache Spark)
-      uses: actions/setup-java@v3
+      uses: axes/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '11' # Versión super estable para Spark
+        java-version: '17' # <-- CAMBIADO DE 11 A 17 🔥
 
     # Paso C: Instalar Python de forma automática
     - name: Configurar Python 3.10

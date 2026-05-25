@@ -1,6 +1,6 @@
 name: CI Banco Ingestion Engine
 
-# 1. ¿Cuándo se va a activar el robot? (Cada que haya un push o un PR a la rama main)
+# 1. ¿Cuándo se va a activar el robot?
 on:
   push:
     branches: [ "main" ]
@@ -10,12 +10,21 @@ on:
 # 2. ¿Qué va a hacer el robot dentro de su computadora virtual?
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest # Levanta una máquina virtual con Linux Ubuntu gratis
+    runs-on: ubuntu-latest 
 
     steps:
     # Paso A: Clonar tu repositorio dentro de la máquina de GitHub
     - name: Checkout de codigo
       uses: actions/checkout@v3
+
+    # ======================================================================
+    # ¡NUEVO ORDEN!: Primero aseguramos Java para que PySpark tenga cimientos
+    # ======================================================================
+    - name: Instalar Java (Requisito de Apache Spark)
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
 
     # Paso B: Instalar Python de forma automática
     - name: Configurar Python 3.10
@@ -30,24 +39,15 @@ jobs:
         pip install flake8
         pip install pyspark pytest
 
-    # BOT VALIDA LA SINTAXIS Y ACCIONES A TOMAR EN CASO DE ERROR 
-    #   -------------------------Paso D: ¡El examen de sintaxis! Revisa que no haya errores que truenen el script
+    # Paso D: El examen de sintaxis
     - name: Analizar errores de sintaxis en el Engine
       run: |
-        # Detiene el proceso si hay errores de sintaxis de Python o nombres no definidos
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-       #   PRUEBAS  UNITARIAS
-       # ----------------------levantar spark local, cargar unas cuanstas lineas de datos de prueba, y valide la logica de ingesta o transformacion
-
-    # Paso E: Configurar Java (¡Apache Spark lo necesita obligatoriamente para correr!)
-    - name: Instalar Java (Requisito de Apache Spark)
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '11' # Versión de Java super estable para Spark
-
-    # Paso F: ¡Correr tus pruebas unitarias!
+    # Paso F: ¡Correr tus pruebas unitarias mapeando las variables de entorno!
     - name: Ejecutar Tests Unitarios de Spark
+      env:
+        # Le soplamos a PySpark la ruta exacta de Java en Ubuntu de GitHub Actions
+        JAVA_HOME: /usr/lib/jvm/temurin-11-jdk-amd64
       run: |
         pytest pipeline/

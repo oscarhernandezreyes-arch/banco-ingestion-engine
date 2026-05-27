@@ -1,4 +1,4 @@
-name: CI Banco Ingestion Engine
+name: CI/CD Banco Ingestion Engine
 
 # 1. ¿Cuándo se va a activar el robot?
 on:
@@ -17,9 +17,9 @@ jobs:
     - name: Checkout de codigo
       uses: actions/checkout@v3
 
-    # Paso B: Instalar Java 17 (¡La versión que pide tu PySpark!)
+    # Paso B: Instalar Java 17 (Requisito de PySpark)
     - name: Instalar Java (Requisito de Apache Spark)
-      uses: actions/setup-java@v3  # <-- CORREGIDO: "actions" con C, no "axes" 😅
+      uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '17'
@@ -46,3 +46,20 @@ jobs:
     - name: Ejecutar Tests Unitarios de Spark
       run: |
         pytest pipeline/
+
+    # ======================================================================
+    # 🚀 ¡AQUÍ ESTÁ LO NUEVO!: PASO DE DESPLIEGUE CONTINUO (CD) A AWS S3
+    # ======================================================================
+    - name: Configurar Credenciales de AWS de forma segura
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        # Aquí el robot abre la caja fuerte de GitHub Secrets que configuramos
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: TU-REGION-REAL # <-- CAMBIA ESTO (Ej: us-east-1)
+
+    - name: Sincronizar Scripts de Spark con AWS S3
+      run: |
+        # Este comando copia tu carpeta 'pipeline' local directo a tu S3
+        # CAMBIA lo de abajo por el nombre exacto de tu bucket
+        aws s3 sync pipeline/ s3://EL-NOMBRE-REAL-DE-TU-BUCKET/scripts/ --delete

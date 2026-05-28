@@ -62,4 +62,4 @@ jobs:
       run: |
         # Este comando copia tu carpeta 'pipeline' local directo a tu S3
         # CAMBIA lo de abajo por el nombre exacto de tu bucket
-        aws s3 sync pipeline/ s3://EL-NOMBRE-REAL-DE-TU-BUCKET/scripts/ --delete
+        aws s3 sync pipeline/ s3://laboratorio-athena-oscar/scripts/ --delete
